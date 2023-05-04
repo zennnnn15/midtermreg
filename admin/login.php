@@ -8,7 +8,7 @@ include('./db_connect.php');
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Login | Event Registration and Attendance System</title>
+  <title>Login | Event Registration</title>
  	
 
 <?php include('./header.php'); ?>
@@ -42,7 +42,7 @@ header("location:index.php?page=home");
   <main id="main" >
   	
   		<div class="align-self-center w-100">
-		<h4 class="text-white text-center"><b>Event Registration and Attendance System - Admin</b></h4>
+		<h4 class="text-white text-center"><b>Event Registration  System - Admin</b></h4>
   		<div id="login-center" class="bg-dark row justify-content-center">
   			<div class="card col-md-4">
   				<div class="card-body">

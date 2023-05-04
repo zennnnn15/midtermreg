@@ -4,7 +4,7 @@
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="login-logo">
-    <a href="#"><b>Event Registration and Attendance System</b></a>
+    <a href="#"><b>Event Registration</b></a>
   </div>
   <!-- /.login-logo -->
   <div class="card">

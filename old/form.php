@@ -1,5 +1,5 @@
 <?php
-include 'database/dbcon.php';
+include '../database/dbcon.php';
 $formID = $_GET['formID'];
 ?>
 <!DOCTYPE html>
