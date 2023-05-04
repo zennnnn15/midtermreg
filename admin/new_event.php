@@ -22,6 +22,7 @@
 
           </div>
 				</div>
+        
         <div class="row">
            <div class="col-md-6">
             <div class="form-group">
@@ -30,21 +31,30 @@
             </div>
           </div>
 		  
-		  <div class="col-md-6">
+          <div class="col-md-6">
   <div class="form-group">
     <label for="" class="control-label">Subevents</label>
+    <button type="button" class="btn btn-sm btn-primary float-right mt-2" id="add-subevent">Add Subevent</button>
     <div id="subevents-container">
-      <?php
-      if(isset($subevents)){
-        foreach(json_decode($subevents) as $subevent){
-          echo '<input type="text" class="form-control form-control-sm mb-2" name="subevents[]" value="'.$subevent.'">';
-        }
-      }
-      ?>
+      <?php if(isset($subevents) && !empty($subevents)): ?>
+        <?php foreach($subevents as $index => $subevent): ?>
+          <br>
+          <hr>
+          <div class="subevent">
+            <div class="form-group d-flex align-items-center">
+              <label for="">Subevent Name</label>
+              <input type="text" class="form-control form-control-sm mb-2 mr-2" name="subevents[<?php echo $index + 1 ?>][name]" value="<?php echo $subevent ?>">
+              <button type="button" class="btn btn-sm btn-danger delete-subevent">Delete</button>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
     </div>
-    <button type="button" class="btn btn-sm btn-primary mt-2" id="add-subevent">Add Subevent</button>
   </div>
 </div>
+
+
+
 
         </div>
 				<div class="row">
@@ -72,13 +82,16 @@ $('#manage-event').submit(function(e){
     e.preventDefault()
     start_load()
 
-    var subevents = []
-    $('input[name="subevents[]"]').each(function() {
-        subevents.push($(this).val())
-    })
 
-    var formData = new FormData($(this)[0])
-    formData.append('subevents', JSON.stringify(subevents))
+    var formData = new FormData($(this)[0]);
+var subevents = [];
+
+$('input[name^="subevents"]').each(function() {
+  subevents.push($(this).val());
+});
+
+formData.append('subevents', JSON.stringify(subevents));
+
 
     $.ajax({
         url:'ajax.php?action=save_event',
@@ -99,12 +112,44 @@ $('#manage-event').submit(function(e){
     })
 })
 
-$(document).ready(function(){
-    var subeventTemplate = '<input type="text" class="form-control form-control-sm mb-2" name="subevents[]">';
-    $('#add-subevent').click(function(){
-        $('#subevents-container').append(subeventTemplate);
+$(document).ready(function() {
+  var subeventIndex = 0;
+
+  // Add subevent
+  $("#add-subevent").click(function() {
+    subeventIndex++;
+
+    var html = `
+<div class="subevent">
+    <h5>Subevent ${subeventIndex}</h5>
+   <div class="form-group">
+  <label for="">Subevent Name</label>
+  <input type="text" class="form-control form-control-sm mb-2" name="subevents[${subeventIndex}][name]">
+</div>
+
+    <button type="button" class="btn btn-sm btn-danger delete-subevent">Delete</button>
+</div>
+`;
+
+
+
+    $("#subevents-container").append(html);
+
+    // initialize datepicker
+    $('.datetimepicker').datetimepicker({
+      format: 'Y/m/d H:i'
     });
+  });
+
+  // Delete subevent
+  $(document).on("click", ".delete-subevent", function() {
+    $(this).closest(".subevent").remove();
+  });
 });
+
+
+
+
 
 </script>
 

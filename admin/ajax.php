@@ -82,6 +82,22 @@ if($action == 'update_attendee_stats'){
 		echo $save;
 }
 
+if ($_GET['action'] == 'check_email_exist') {
+	include 'db_connect.php';
+	$event_id = $_POST['event_id'];
+	$email = $_POST['email'];
+	$attendee_id = $_POST['attendee_id'] ?? '';
+
+	$where = "email = '$email' AND event_id = '$event_id'";
+	if(!empty($attendee_id)){
+		$where .= " AND id != '$attendee_id'";
+	}
+
+	$qry = $conn->query("SELECT * FROM attendees WHERE $where");
+	echo $qry->num_rows ? 1 : 0;
+	exit;
+}
+
 if ($_GET['action'] == 'get_events') {
 	include 'db_connect.php';
     $event_id = $_GET['event_id'];
@@ -93,6 +109,8 @@ if ($_GET['action'] == 'get_events') {
     echo '<select name="subevent_id" id="" class="custom-select custom-select-sm">'.$options.'</select>';
     exit;
 }
+
+
 
 ob_end_flush();
 ?>

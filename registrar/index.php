@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<?php session_start() ?>
+<?php 
+  if(!isset($_SESSION['login_id']))
+  header('location:login.php');
+	include 'header.php' 
+?>
 <body class="hold-transition layout-fixed layout-navbar-fixed layout-footer-fixed sidebar-collapse">
 <div class="wrapper">
   <?php include 'topbar.php' ?>

@@ -192,36 +192,85 @@ Class Action {
 		extract($_POST);
 		$event_data = "";
 		foreach($_POST as $k => $v){
-			if(!in_array($k, array('id', 'subevents')) && !is_numeric($k)){
-				if(empty($event_data)){
-					$event_data .= " $k='$v' ";
-				}else{
-					$event_data .= ", $k='$v' ";
-				}
+		  if(!in_array($k, array('id', 'subevents')) && !is_numeric($k)){
+			if(empty($event_data)){
+			  $event_data .= " $k='$v' ";
+			}else{
+			  $event_data .= ", $k='$v' ";
 			}
+		  }
 		}
 		$event_data .= ", status='1' ";
 	  
 		if(empty($id)){
-			$save_event = $this->db->query("INSERT INTO events set $event_data");
-			$event_id = $this->db->insert_id;
+		  $save_event = $this->db->query("INSERT INTO events SET $event_data");
+		  $event_id = $this->db->insert_id;
 		}else{
-			$save_event = $this->db->query("UPDATE events set $event_data where id = $id");
-			$event_id = $id;
+		  $save_event = $this->db->query("UPDATE events SET $event_data WHERE id = $id");
+		  $event_id = $id;
 		}
-	
-		// Save sub-events
-
-		if(isset($subevents)){
-			foreach($subevents as $subevent){
-				$this->db->query("INSERT INTO event_sub (idEvent, eventsubName) VALUES ('$event_id', '$subevent')");
-			}
-		}
-	
+	  
 		if($save_event){
-			return 1;
-		}
-	}
+		  // Save subevents
+		  $existing_subevents = array();
+		  $subevents_qry = $this->db->query("SELECT * FROM event_sub WHERE idEvent = $event_id");
+		  while($row = $subevents_qry->fetch_assoc()){
+			$existing_subevents[] = $row['eventsubName'];
+		  }
+	
+		  if(!empty($subevents)){
+			$subevents_arr = json_decode($subevents); // decode JSON string
+	
+			// Delete old subevents that are not in the new subevents list
+			$old_subevents = array_diff($existing_subevents, $subevents_arr);
+			if(!empty($old_subevents)){
+			  $old_subevents_str = "'" . implode("','", $old_subevents) . "'";
+			  $delete_subevents = $this->db->query("DELETE FROM event_sub WHERE idEvent = $event_id AND eventsubName IN ($old_subevents_str)");
+			  if(!$delete_subevents){
+				// Rollback the event insert/update
+				if(empty($id)){
+				  $this->db->query("DELETE FROM events WHERE id = $event_id");
+				}
+				return 0;
+			  }
+			}
+	
+			// Insert new subevents that are not in the existing subevents list
+			$new_subevents = array_diff($subevents_arr, $existing_subevents);
+			if(!empty($new_subevents)){
+			  $new_subevent_values = array();
+			  foreach($new_subevents as $subevent){
+				$subevent_name = $this->db->real_escape_string($subevent);
+				$new_subevent_values[] = "('$subevent_name', $event_id)";
+			  }
+			  $new_subevent_values_str = implode(',', $new_subevent_values);
+			  $save_new_subevents = $this->db->query("INSERT INTO event_sub (eventsubName,idEvent) VALUES $new_subevent_values_str");
+			  if(!$save_new_subevents){
+			  // Rollback the event insert/update
+			  if(empty($id)){
+			  $this->db->query("DELETE FROM events WHERE id = $event_id");
+			  }
+			  return 0;
+			  }
+			  }
+			  }else{
+			  // Delete all subevents if subevents list is empty
+			  $delete_all_subevents = $this->db->query("DELETE FROM event_sub WHERE idEvent = $event_id");
+			  if(!$delete_all_subevents){
+			  // Rollback the event insert/update
+			  if(empty($id)){
+			  $this->db->query("DELETE FROM events WHERE id = $event_id");
+			  }
+			  return 0;
+			  }
+			  }
+			  return 1;
+			  }
+			  return 0;
+			  }
+	
+	
+	  
 	
 	function update_event_stats(){
 		extract($_POST);
@@ -249,9 +298,9 @@ Class Action {
 			}
 		}
 		if(isset($status)){
-					$data .= ", status=0 ";
-		}else{
 					$data .= ", status=1 ";
+		}else{
+					$data .= ", status=0 ";
 		}
 		if(empty($id)){
 			$save = $this->db->query("INSERT INTO attendees set $data");
@@ -296,4 +345,7 @@ Class Action {
 			if($save)
 				return 1;
 	}
+	
+
 }
+

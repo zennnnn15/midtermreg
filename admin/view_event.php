@@ -29,6 +29,32 @@ foreach($qry as $k =>$v){
 							<dt>Description</dt>
 							<dd><?php echo html_entity_decode($description) ?></dd>
 						</dl>
+						<?php
+$subevents = array();
+$subevents_qry = $conn->query("SELECT * FROM event_sub WHERE idEvent = ".$_GET['id']);
+while($row = $subevents_qry->fetch_assoc()){
+    $subevents[] = $row['eventsubName'];
+}
+
+?>
+<dl class="callout callout-info">
+  <dd>
+    <div id="subevents-container">
+      <?php if(isset($subevents) && !empty($subevents)): ?>
+        <?php foreach($subevents as $index => $subevent): ?>
+          <div class="subevent">
+            <div class="form-group d-flex align-items-center">
+              <label for="">Subevent<?php echo $index +1 ?></label>
+              <h6 class="ml-5"><?php echo html_entity_decode($subevent) ?></h6>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    </div>
+  </dd>
+</dl>
+
+
 					</div>
 				</div>
 			</div>

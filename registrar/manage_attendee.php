@@ -2,7 +2,9 @@
 
 <?php
 if(!isset($conn))
-include 'db_connect.php';
+include '../admin/db_connect.php';
+
+
 ?>
 <script>
 	
@@ -69,9 +71,10 @@ $(document).ready(function(){
 							</select>
 						</div>
 						<div class="form-group">
-							<label for="" class="control-label">Email</label>
-							<input type="email" name="email" class="form-control form-control-sm" required value="<?php echo isset($email) ? $email : '' ?>">
-						</div>
+  <label for="email" class="control-label">Email</label>
+  <input type="email" name="email" id="email" class="form-control form-control-sm" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" value="<?php echo isset($email) ? $email : '' ?>">
+</div>
+
 						<div class="form-group">
 							<label for="" class="control-label">Contact No.</label>
 							<input type="text" name="contact" class="form-control form-control-sm" required value="<?php echo isset($contact) ? $contact : '' ?>">
@@ -83,10 +86,6 @@ $(document).ready(function(){
 					</div>
 				</div>
 				<hr>
-				<div class="col-lg-12 text-right justify-content-center d-flex">
-					<button class="btn btn-primary mr-2">Save</button>
-					<button class="btn btn-secondary" type="button" onclick="location.href = 'index.php?page=attendees'">Cancel</button>
-				</div>
 			</form>
 		</div>
 	</div>
@@ -103,7 +102,7 @@ $(document).ready(function(){
     if (event_id) {
         // Fetch events for selected event_id
         $.ajax({
-            url: 'ajax.php?action=get_events',
+            url: '../admin/ajax.php?action=get_events',
             data: {event_id: event_id},
             success: function(resp) {
                 // Replace event dropdown with new options
@@ -116,25 +115,59 @@ $(document).ready(function(){
     }
 });
 
-	$('#manage_attendee').submit(function(e){
-		e.preventDefault()
-		start_load()
-		$.ajax({
-			url:'ajax.php?action=save_attendee',
-			data: new FormData($(this)[0]),
-		    cache: false,
-		    contentType: false,
-		    processData: false,
-		    method: 'POST',
-		    type: 'POST',
-			success:function(resp){
-				if(resp == 1){
-					alert_toast('Data successfully saved.',"success");
-					setTimeout(function(){
-						location.replace('index.php?page=attendees')
-					},750)
-				}
-			}
-		})
-	})
+$('#manage_attendee').submit(function(e){
+    e.preventDefault();
+    start_load();
+    var form = $(this);
+    var formData = new FormData(form[0]);
+    var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    var contactRegex = /^\d{11}$/;
+    
+    // Check if required fields are empty
+    var emptyFields = form.find('[required]').filter(function(){
+        return this.value == '';
+    });
+    
+    if(emptyFields.length){
+        emptyFields.first().focus();
+        alert_toast('Please fill up all required fields.', 'warning');
+        end_load();
+        return false;
+    }
+    
+    // Check email format
+    if(formData.get('email') && !emailRegex.test(formData.get('email'))){
+        form.find('[name=email]').focus();
+        alert_toast('Invalid email format.', 'warning');
+        end_load();
+        return false;
+    }
+    
+    // Check contact number format
+    if(formData.get('contact') && !contactRegex.test(formData.get('contact'))){
+        form.find('[name=contact]').focus();
+        alert_toast('Contact number should consist of 11 digits only.', 'warning');
+        end_load();
+        return false;
+    }
+    
+    $.ajax({
+        url:'../admin/ajax.php?action=save_attendee',
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        method: 'POST',
+        type: 'POST',
+        success:function(resp){
+            if(resp == 1){
+                alert_toast('Data successfully saved.', 'success');
+                setTimeout(function(){
+                    location.replace('index.php');
+                },750);
+            }
+        }
+    });
+});
+
 </script>
