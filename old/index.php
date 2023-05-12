@@ -39,7 +39,7 @@
   <div class="container">
     <div class="row">
       <?php
-        include 'database/dbcon.php';
+        include '../database/dbcon.php';
         // Fetch the form data from the database
         $sql = "SELECT `formID`, `formName`, `image`, `formDesc` FROM `form`";
         $result = $con->query($sql);

@@ -64,6 +64,7 @@ $formID = $_GET['formID'];
                     echo '<div class="form-group">';
                     echo '<label for="'.$field_name.'">'.$field_label.'</label>';
                     echo '<input type="number" class="form-control" name="'.$field_name.'" id="'.$field_name.'">';
+                    echo '<button> Delete </button>';
                     echo '</div>';
                     break;
                 case 'radio':
